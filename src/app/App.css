@@ -1,0 +1,15 @@
+.app-shell {
+  min-height: 100vh;
+  background: var(--gradient-app);
+}
+
+.app-shell--loading {
+  display: grid;
+  place-items: center;
+}
+
+.app-shell--loading p {
+  margin: 0;
+  font-weight: 600;
+  color: var(--color-text-soft);
+}

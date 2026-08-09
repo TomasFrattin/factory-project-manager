@@ -1,0 +1,422 @@
+.factory-hours-manager {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 22px;
+  box-shadow: var(--shadow-card);
+}
+
+.factory-hours-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.factory-hours-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.factory-hours-header h2 {
+  margin: 0;
+  color: var(--color-title);
+}
+
+.factory-hours-action {
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  padding: 8px 12px;
+  background: var(--color-bg-soft);
+  color: var(--color-text);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.factory-hours-action--primary {
+  border-color: var(--color-primary);
+  background: var(--color-primary-soft);
+  color: var(--color-primary-strong);
+}
+
+.factory-hours-form {
+  margin-top: 16px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.factory-hours-form--modal {
+  margin-top: 0;
+}
+
+.factory-field {
+  display: grid;
+  gap: 6px;
+  align-content: start;
+}
+
+.factory-field--full {
+  grid-column: span 2;
+}
+
+.factory-field label {
+  font-weight: 600;
+  color: var(--color-text-soft);
+}
+
+.factory-date-field {
+  position: relative;
+}
+
+.factory-date-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  padding: 10px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.factory-date-trigger:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 1px;
+}
+
+.factory-date-trigger--empty {
+  color: var(--color-text-muted);
+}
+
+.factory-date-trigger-icon {
+  width: 16px;
+  height: 16px;
+  color: var(--color-text-soft);
+  flex-shrink: 0;
+}
+
+.factory-date-popover {
+  position: fixed;
+  z-index: 1600;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 10px;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-card);
+  max-height: calc(100vh - 20px);
+  overflow: auto;
+}
+
+.factory-date-popover[data-placement='top'] {
+  transform-origin: bottom left;
+}
+
+.factory-date-popover[data-placement='bottom'] {
+  transform-origin: top left;
+}
+
+.factory-day-picker {
+  --rdp-accent-color: var(--color-primary);
+  --rdp-day_button-border-radius: 8px;
+  --rdp-selected-border: 1px solid var(--color-primary);
+  --rdp-today-color: var(--color-primary-strong);
+  margin: 0;
+}
+
+.factory-day-picker .rdp-day_button {
+  font: inherit;
+}
+
+.factory-day-picker .rdp-chevron {
+  fill: var(--color-text-soft);
+}
+
+.factory-hours-form input {
+  width: 100%;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  padding: 10px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+}
+
+.factory-hours-form input:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 1px;
+}
+
+.factory-rate-field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.factory-rate-field input {
+  flex: 1;
+}
+
+.factory-rate-refresh {
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  min-width: 120px;
+  padding: 10px 12px;
+  background: var(--color-bg-soft);
+  color: var(--color-text);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.factory-rate-refresh:disabled {
+  opacity: 0.75;
+  cursor: not-allowed;
+}
+
+.factory-rate-info {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--color-text-soft);
+}
+
+.factory-rate-info--hint {
+  color: var(--color-text-muted);
+}
+
+.factory-hours-submit {
+  grid-column: span 2;
+  border: none;
+  border-radius: var(--radius-md);
+  padding: 12px;
+  font-weight: 700;
+  color: var(--color-surface);
+  background: var(--gradient-brand);
+  cursor: pointer;
+}
+
+.factory-hours-submit:disabled {
+  opacity: 0.75;
+  cursor: wait;
+}
+
+.factory-hours-error {
+  margin: 12px 0 0;
+  color: var(--color-danger);
+  font-weight: 600;
+}
+
+.factory-hours-list-wrap {
+  margin-top: 18px;
+}
+
+.factory-hours-list-wrap h3 {
+  margin: 0 0 12px;
+  color: var(--color-title);
+}
+
+.factory-hours-list-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.factory-hours-list-head h3 {
+  margin: 0;
+}
+
+.factory-hours-filters-toggle {
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  padding: 8px 10px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.factory-hours-filters-toggle:hover {
+  background: var(--color-bg-soft);
+}
+
+.factory-hours-filters {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 220px));
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.factory-hours-filter-field {
+  display: grid;
+  gap: 6px;
+  color: var(--color-text-soft);
+  font-size: 0.84rem;
+  font-weight: 600;
+}
+
+.factory-hours-filter-field select {
+  width: 100%;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  padding: 8px 10px;
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+}
+
+.factory-hours-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.factory-hours-summary-card {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 10px 12px;
+  background: var(--color-bg-soft);
+}
+
+.factory-hours-summary-card p {
+  margin: 0;
+  color: var(--color-text-soft);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.factory-hours-summary-card strong {
+  display: block;
+  margin-top: 4px;
+  color: var(--color-title);
+  font-size: 1rem;
+}
+
+.factory-hours-table-scroll {
+  overflow-x: auto;
+}
+
+.factory-hours-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 960px;
+}
+
+.factory-hours-table th,
+.factory-hours-table td {
+  border-bottom: 1px solid var(--color-border);
+  text-align: left;
+  padding: 10px;
+  font-size: 0.92rem;
+}
+
+.factory-hours-table th {
+  color: var(--color-text-soft);
+  background: var(--color-bg-soft);
+}
+
+.factory-hours-actions-cell {
+  vertical-align: middle;
+}
+
+.factory-hours-actions-content {
+  display: flex;
+  gap: 8px;
+}
+
+.factory-hours-row-button {
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  padding: 6px 10px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.factory-hours-row-button--danger {
+  border-color: var(--border-danger-soft);
+  color: var(--color-danger);
+}
+
+.factory-payment {
+  grid-column: span 2;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 12px;
+  background: var(--color-surface-muted);
+}
+
+.factory-payment h3 {
+  grid-column: span 2;
+  margin: 0;
+  font-size: 1rem;
+  color: var(--color-primary-strong);
+}
+
+.factory-paid {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.factory-paid input {
+  width: auto;
+}
+
+@media (max-width: 900px) {
+  .factory-hours-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .factory-hours-list-head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .factory-hours-form {
+    grid-template-columns: 1fr;
+  }
+
+  .factory-hours-filters,
+  .factory-hours-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .factory-date-popover {
+    width: 100%;
+  }
+
+  .factory-day-picker {
+    width: 100%;
+  }
+
+  .factory-field--full,
+  .factory-hours-submit,
+  .factory-payment {
+    grid-column: span 1;
+  }
+
+  .factory-payment h3 {
+    grid-column: span 1;
+  }
+
+  .factory-rate-field {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .factory-rate-refresh {
+    width: 100%;
+  }
+}

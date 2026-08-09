@@ -1,0 +1,54 @@
+.workspace-layout-page {
+  min-height: 100vh;
+}
+
+.workspace-layout-grid {
+  width: 100%;
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 260px minmax(0, 1fr);
+  gap: 0;
+  align-items: stretch;
+}
+
+.workspace-layout-content {
+  display: block;
+  padding: 28px;
+}
+
+.workspace-tour-launcher {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 1100;
+  border: none;
+  border-radius: 999px;
+  padding: 12px 18px;
+  background: var(--gradient-brand);
+  color: var(--color-surface);
+  font-weight: 700;
+  box-shadow: var(--shadow-floating);
+  cursor: pointer;
+}
+
+.workspace-tour-launcher:hover {
+  filter: brightness(1.05);
+}
+
+@media (max-width: 900px) {
+  .workspace-layout-grid {
+    grid-template-columns: 1fr;
+    min-height: auto;
+  }
+
+  .workspace-layout-content {
+    padding: 22px;
+  }
+
+  .workspace-tour-launcher {
+    right: 16px;
+    bottom: 16px;
+    padding: 10px 14px;
+    font-size: 0.9rem;
+  }
+}

@@ -1,0 +1,59 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner() {
+      return signedIn() && resource.data.userId == request.auth.uid;
+    }
+
+    function isCreatingOwnDoc() {
+      return signedIn() && request.resource.data.userId == request.auth.uid;
+    }
+
+    function isUpdatingOwnDoc() {
+      return isOwner() && request.resource.data.userId == resource.data.userId;
+    }
+
+    function hasValidTariffType() {
+      return request.resource.data.type in ['diseno', 'fabrica'];
+    }
+
+    match /projects/{docId} {
+      allow read: if isOwner();
+      allow create: if isCreatingOwnDoc();
+      allow update: if isUpdatingOwnDoc();
+      allow delete: if isOwner();
+    }
+
+    match /clients/{docId} {
+      allow read: if isOwner();
+      allow create: if isCreatingOwnDoc();
+      allow update: if isUpdatingOwnDoc();
+      allow delete: if isOwner();
+    }
+
+    match /factoryHours/{docId} {
+      allow read: if isOwner();
+      allow create: if isCreatingOwnDoc();
+      allow update: if isUpdatingOwnDoc();
+      allow delete: if isOwner();
+    }
+
+    match /tariffs/{docId} {
+      allow read: if isOwner();
+      allow create: if isCreatingOwnDoc() && hasValidTariffType();
+      allow update: if isUpdatingOwnDoc() && hasValidTariffType();
+      allow delete: if isOwner();
+    }
+
+    match /notes/{docId} {
+      allow read: if isOwner();
+      allow create: if isCreatingOwnDoc();
+      allow update: if isUpdatingOwnDoc();
+      allow delete: if isOwner();
+    }
+  }
+}

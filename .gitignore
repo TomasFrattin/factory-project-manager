@@ -6,19 +6,40 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
+*.pid
+*.seed
+*.pid.lock
 
+# Dependencies
 node_modules
+
+# Build outputs
 dist
 dist-ssr
+coverage
+*.tsbuildinfo
+
+# Local env files
+.env
+.env.*
+!.env.example
 *.local
+
+# Firebase local artifacts
+.firebase/
 
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
 .idea
 .DS_Store
+.DS_Store?
+Thumbs.db
+Desktop.ini
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
+*.tmp
+*.temp

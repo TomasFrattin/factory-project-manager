@@ -1,0 +1,203 @@
+.tariffs-manager {
+	background: var(--color-surface);
+	border: 1px solid var(--color-border);
+	border-radius: var(--radius-lg);
+	padding: 22px;
+	box-shadow: var(--shadow-card);
+}
+
+.tariffs-manager-header h2 {
+	margin: 0;
+	color: var(--color-title);
+}
+
+.tariffs-manager-header p {
+	margin: 8px 0 0;
+	color: var(--color-text-soft);
+}
+
+.tariffs-rate-chip {
+	margin-top: 14px;
+	border: 1px solid var(--color-border);
+	border-radius: var(--radius-md);
+	background: var(--color-bg-soft);
+	color: var(--color-text-soft);
+	padding: 10px 12px;
+	font-size: 0.9rem;
+}
+
+.tariffs-error {
+	margin: 12px 0 0;
+	color: var(--color-danger);
+	font-weight: 600;
+}
+
+.tariffs-grid {
+	margin-top: 16px;
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 14px;
+}
+
+.tariffs-card {
+	border: 1px solid var(--color-border);
+	border-radius: var(--radius-md);
+	background: var(--color-surface-muted);
+	padding: 14px;
+}
+
+.tariffs-card h3 {
+	margin: 0;
+	color: var(--color-title);
+	font-size: 1rem;
+}
+
+.tariffs-current {
+	margin-top: 10px;
+	display: grid;
+	gap: 2px;
+}
+
+.tariffs-current-label {
+	color: var(--color-text-muted);
+	font-size: 0.82rem;
+}
+
+.tariffs-current strong {
+	color: var(--color-text);
+}
+
+.tariffs-form {
+	margin-top: 12px;
+	display: grid;
+	gap: 8px;
+}
+
+.tariffs-form label {
+	font-weight: 600;
+	color: var(--color-text-soft);
+}
+
+.tariffs-form input {
+	width: 100%;
+	border: 1px solid var(--color-border-strong);
+	border-radius: var(--radius-md);
+	padding: 10px;
+	background: var(--color-surface);
+	color: var(--color-text);
+	font: inherit;
+}
+
+.tariffs-form input:focus {
+	outline: 2px solid var(--color-primary);
+	outline-offset: 1px;
+}
+
+.tariffs-preview {
+	margin: 0;
+	color: var(--color-text-muted);
+	font-size: 0.88rem;
+}
+
+.tariffs-submit {
+	border: none;
+	border-radius: var(--radius-md);
+	padding: 10px 12px;
+	font-weight: 700;
+	color: var(--color-surface);
+	background: var(--gradient-brand);
+	cursor: pointer;
+}
+
+.tariffs-submit:disabled {
+	opacity: 0.75;
+	cursor: wait;
+}
+
+.tariffs-history-wrap {
+	margin-top: 14px;
+}
+
+.tariffs-history-wrap h4 {
+	margin: 0 0 8px;
+	color: var(--color-title);
+	font-size: 0.95rem;
+}
+
+.tariffs-history-wrap p {
+	margin: 0;
+	color: var(--color-text-muted);
+}
+
+.tariffs-table-scroll {
+	overflow-x: auto;
+}
+
+.tariffs-table {
+	width: 100%;
+	border-collapse: collapse;
+	min-width: 420px;
+}
+
+.tariffs-table th,
+.tariffs-table td {
+	border-bottom: 1px solid var(--color-border);
+	text-align: left;
+	padding: 9px 8px;
+	font-size: 0.88rem;
+}
+
+.tariffs-table th {
+	color: var(--color-text-soft);
+	background: var(--color-bg-soft);
+}
+
+.tariffs-actions-cell {
+	vertical-align: middle;
+}
+
+.tariffs-actions-content {
+	display: flex;
+	gap: 8px;
+}
+
+.tariffs-row-button {
+	border: 1px solid var(--color-border-strong);
+	border-radius: var(--radius-sm);
+	padding: 6px 10px;
+	background: var(--color-surface);
+	color: var(--color-text);
+	font-size: 0.82rem;
+	cursor: pointer;
+}
+
+.tariffs-row-button--danger {
+	border-color: var(--border-danger-soft);
+	color: var(--color-danger);
+}
+
+.tariffs-modal-field {
+	display: grid;
+	gap: 8px;
+}
+
+.tariffs-modal-field label {
+	font-weight: 600;
+	color: var(--color-text-soft);
+}
+
+.tariffs-modal-field input {
+	width: 100%;
+	border: 1px solid var(--color-border-strong);
+	border-radius: var(--radius-md);
+	padding: 10px;
+	background: var(--color-surface);
+	color: var(--color-text);
+	font: inherit;
+}
+
+@media (max-width: 960px) {
+	.tariffs-grid {
+		grid-template-columns: 1fr;
+	}
+}

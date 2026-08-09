@@ -1,0 +1,226 @@
+.notes-manager {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 22px;
+  box-shadow: var(--shadow-card);
+}
+
+.notes-manager-header {
+  margin-bottom: 14px;
+}
+
+.notes-manager-header h2 {
+  margin: 0;
+  color: var(--color-title);
+}
+
+.notes-manager-header p {
+  margin: 6px 0 0;
+  color: var(--color-text-soft);
+}
+
+.notes-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px 14px;
+  margin-bottom: 16px;
+}
+
+.notes-field {
+  display: grid;
+  gap: 6px;
+}
+
+.notes-field--full {
+  grid-column: span 2;
+}
+
+.notes-field label {
+  font-weight: 600;
+  color: var(--color-text-soft);
+}
+
+.notes-field input,
+.notes-field textarea {
+  width: 100%;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  padding: 10px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+}
+
+.notes-field textarea {
+  resize: vertical;
+  min-height: 90px;
+}
+
+.notes-field input:focus,
+.notes-field textarea:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 1px;
+}
+
+.notes-submit {
+  grid-column: span 2;
+  justify-self: start;
+  border: none;
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  font-weight: 700;
+  color: var(--color-surface);
+  background: var(--gradient-brand);
+  cursor: pointer;
+}
+
+.notes-submit:disabled {
+  opacity: 0.75;
+  cursor: not-allowed;
+}
+
+.notes-error {
+  margin: 0 0 14px;
+  color: var(--color-danger);
+  font-weight: 600;
+}
+
+.notes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(430px, 1fr));
+  gap: 12px;
+}
+
+.notes-card {
+  min-width: 0;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-soft);
+  padding: 12px;
+  cursor: pointer;
+  transition: border-color 140ms ease, box-shadow 140ms ease, transform 140ms ease;
+}
+
+.notes-card:hover {
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-card);
+  transform: translateY(-1px);
+}
+
+.notes-card:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 1px;
+}
+
+.notes-card--expanded {
+  background: var(--color-surface-muted);
+}
+
+.notes-card-head h3 {
+  margin: 0;
+  color: var(--color-title);
+  font-size: 1rem;
+  overflow-wrap: anywhere;
+}
+
+.notes-card-head p {
+  margin: 4px 0 0;
+  font-size: 0.83rem;
+  color: var(--color-text-soft);
+}
+
+.notes-card-body {
+  margin-top: 10px;
+  border-top: 1px solid var(--color-border);
+  padding-top: 10px;
+  display: grid;
+  gap: 10px;
+}
+
+.notes-card-body p {
+  margin: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  color: var(--color-text);
+}
+
+.notes-edit-wrap {
+  display: grid;
+  gap: 10px;
+}
+
+.notes-edit-wrap .notes-field textarea {
+  min-height: 120px;
+}
+
+.notes-actions-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.notes-edit,
+.notes-delete {
+  justify-self: start;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  padding: 7px 10px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.notes-save {
+  justify-self: start;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 7px 10px;
+  background: var(--gradient-brand);
+  color: var(--color-surface);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.notes-cancel {
+  justify-self: start;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  padding: 7px 10px;
+  background: var(--color-bg-soft);
+  color: var(--color-text);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.notes-delete {
+  border: 1px solid var(--border-danger-soft);
+  background: var(--surface-danger-soft);
+  color: var(--color-danger);
+}
+
+.notes-save:disabled,
+.notes-cancel:disabled,
+.notes-edit:disabled,
+.notes-delete:disabled {
+  opacity: 0.75;
+  cursor: not-allowed;
+}
+
+.notes-delete:disabled,
+.notes-save:disabled {
+  cursor: wait;
+}
+
+@media (max-width: 900px) {
+  .notes-form {
+    grid-template-columns: 1fr;
+  }
+
+  .notes-field--full,
+  .notes-submit {
+    grid-column: span 1;
+  }
+}

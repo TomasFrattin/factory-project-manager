@@ -10,8 +10,15 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@react-pdf/renderer": "^4.5.1",
+    "firebase": "^12.16.0",
+    "lucide-react": "^1.28.0",
     "react": "^19.2.7",
-    "react-dom": "^19.2.7"
+    "react-day-picker": "^10.0.1",
+    "react-dom": "^19.2.7",
+    "react-joyride": "^3.2.0",
+    "react-router-dom": "^7.18.1",
+    "react-select": "^5.10.2"
   },
   "devDependencies": {
     "@types/react": "^19.2.17",
