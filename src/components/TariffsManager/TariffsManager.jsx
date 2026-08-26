@@ -147,6 +147,7 @@ function TariffsManager({ user, notify }) {
         setRateState({
           loading: false,
           sell: rate.sell,
+          updatedAt: rate.updatedAt ?? null,
           error: '',
         })
       } catch (error) {
@@ -208,7 +209,7 @@ function TariffsManager({ user, notify }) {
         usdPerHour: Number(usdPerHour.toFixed(2)),
         estimatedArsPerHour,
         estimatedRateUsed: rateState.sell,
-        estimatedRateUpdatedAt: rateState.updatedAt,
+        estimatedRateUpdatedAt: rateState.updatedAt ?? null,
         createdOn: new Date().toISOString(),
         userId: user.uid,
         userEmail: user.email,
@@ -275,7 +276,7 @@ function TariffsManager({ user, notify }) {
         usdPerHour: Number(usdPerHour.toFixed(2)),
         estimatedArsPerHour,
         estimatedRateUsed: rateState.sell,
-        estimatedRateUpdatedAt: rateState.updatedAt,
+        estimatedRateUpdatedAt: rateState.updatedAt ?? null,
         updatedAt: serverTimestamp(),
       })
 

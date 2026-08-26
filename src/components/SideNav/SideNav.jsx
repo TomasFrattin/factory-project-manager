@@ -6,6 +6,7 @@ import {
   HandCoins,
   House,
   LogOut,
+  UserRound,
   SunMoon,
   TrendingUp,
   Users,
@@ -70,6 +71,15 @@ function SideNav({ user, onLogout, theme, onToggleTheme }) {
         </div>
 
         <div className="side-nav-group side-nav-group--utility">
+          <NavLink
+            to="/profile"
+            className={({ isActive }) =>
+              isActive ? 'side-nav-link side-nav-link--active' : 'side-nav-link'
+            }
+          >
+            <UserRound className="ui-button-icon" aria-hidden="true" />
+            Mi perfil
+          </NavLink>
           <NavLink
             to="/tariffs"
             className={({ isActive }) =>

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { PDFDownloadLink, PDFViewer } from '@react-pdf/renderer'
-import { collection, getDocs, query, where } from 'firebase/firestore'
+import { Link } from 'react-router-dom'
+import { collection, doc, getDoc, getDocs, query, where } from 'firebase/firestore'
 import { db } from '../../firebase.js'
 import { PresupuestoPDFDocument } from './PresupuestoPDFDocument.jsx'
 import './BudgetsManager.css'
@@ -53,22 +54,17 @@ const formatArs = (value) => {
   }).format(value)
 }
 
-const createProfessionalForm = () => ({
-  nombre: '',
-  telefono: '',
-  email: '',
-  direccion: '',
+const createDocumentForm = () => ({
   fecha: formatDateInput(new Date()),
   numero: '',
-  firmaUrl: '',
 })
 
-const createClientForm = () => ({
-  telefono: '',
-  direccion: '',
-  contacto: '',
-  referencia: '',
-  logoUrl: '',
+const createProfessionalProfileFallback = (user) => ({
+  professionalName: user.name || '',
+  contactEmail: user.email || '',
+  phone: '',
+  address: '',
+  signatureUrl: '',
 })
 
 const createConditionsForm = () => ({
@@ -77,8 +73,6 @@ const createConditionsForm = () => ({
   plazoEntrega: 'A definir segun alcance',
   formaEntrega: 'Informe digital PDF - A convenir con cliente',
   observaciones: 'Los precios no incluyen revisiones posteriores al alcance acordado.',
-  valorHoraUsd: '-',
-  fechaActualizacionValores: formatDateInput(new Date()),
   ivaPercent: '0',
 })
 
@@ -124,11 +118,13 @@ function BudgetsManager({ user, notify }) {
   const [factoryRecords, setFactoryRecords] = useState([])
   const [selectedClientId, setSelectedClientId] = useState('')
   const [selectedItemKeys, setSelectedItemKeys] = useState({})
-  const [professionalForm, setProfessionalForm] = useState(createProfessionalForm())
-  const [clientForm, setClientForm] = useState(createClientForm())
+  const [documentForm, setDocumentForm] = useState(createDocumentForm())
+  const [professionalProfile, setProfessionalProfile] = useState(() => createProfessionalProfileFallback(user))
   const [conditionsForm, setConditionsForm] = useState(createConditionsForm())
   const [loading, setLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState('')
+
+  const getStatusMark = (hasValue) => (hasValue ? '✓' : '✗')
 
   useEffect(() => {
     let mounted = true
@@ -141,11 +137,13 @@ function BudgetsManager({ user, notify }) {
         const clientsQuery = query(collection(db, 'clients'), where('userId', '==', user.uid))
         const projectsQuery = query(collection(db, 'projects'), where('userId', '==', user.uid))
         const factoryQuery = query(collection(db, 'factoryHours'), where('userId', '==', user.uid))
+        const profileDocRef = doc(db, 'userProfiles', user.uid)
 
-        const [clientsSnapshot, projectsSnapshot, factorySnapshot] = await Promise.all([
+        const [clientsSnapshot, projectsSnapshot, factorySnapshot, profileSnapshot] = await Promise.all([
           getDocs(clientsQuery),
           getDocs(projectsQuery),
           getDocs(factoryQuery),
+          getDoc(profileDocRef),
         ])
 
         if (!mounted) {
@@ -181,6 +179,15 @@ function BudgetsManager({ user, notify }) {
           ...item.data(),
         }))
 
+        const profileData = profileSnapshot.exists() ? profileSnapshot.data() : {}
+        const normalizedProfile = {
+          professionalName: String(profileData.professionalName || user.name || '').trim(),
+          contactEmail: String(profileData.contactEmail || user.email || '').trim(),
+          phone: String(profileData.phone || '').trim(),
+          address: String(profileData.address || '').trim(),
+          signatureUrl: String(profileData.signatureUrl || '').trim(),
+        }
+
         loadedFactory.sort((a, b) => {
           const dateA = String(a.date || '')
           const dateB = String(b.date || '')
@@ -190,6 +197,7 @@ function BudgetsManager({ user, notify }) {
         setClients(loadedClients)
         setProjects(loadedProjects)
         setFactoryRecords(loadedFactory)
+        setProfessionalProfile(normalizedProfile)
       } catch (error) {
         console.error('Error al cargar datos del presupuestador:', error)
         if (mounted) {
@@ -212,21 +220,6 @@ function BudgetsManager({ user, notify }) {
   const selectedClient = useMemo(() => {
     return clients.find((client) => client.id === selectedClientId) || null
   }, [clients, selectedClientId])
-
-  useEffect(() => {
-    if (!selectedClient) {
-      setClientForm((current) => ({
-        ...current,
-        contacto: '',
-      }))
-      return
-    }
-
-    setClientForm((current) => ({
-      ...current,
-      contacto: current.contacto || selectedClient.contact || '',
-    }))
-  }, [selectedClient])
 
   const sourceItems = useMemo(() => {
     const fromProjects = projects
@@ -318,20 +311,50 @@ function BudgetsManager({ user, notify }) {
 
     return {
       nombre: fallbackName || '-',
-      telefono: clientForm.telefono || '-',
-      direccion: clientForm.direccion || '-',
-      contacto: clientForm.contacto || selectedClient?.contact || '-',
-      referencia: clientForm.referencia || '-',
-      logoUrl: clientForm.logoUrl || '',
+      telefono: selectedClient?.phone || '-',
+      direccion: selectedClient?.address || '-',
+      contacto: selectedClient?.contact || '-',
+      logoUrl: String(selectedClient?.logoUrl || '').trim(),
     }
-  }, [clientForm.contacto, clientForm.direccion, clientForm.logoUrl, clientForm.referencia, clientForm.telefono, selectedClient])
+  }, [selectedClient])
 
   const budgetProfessionalData = useMemo(() => {
     return {
-      ...professionalForm,
-      fecha: formatDateLabel(professionalForm.fecha),
+      nombre: professionalProfile.professionalName || user.name || '-',
+      telefono: professionalProfile.phone || '-',
+      email: professionalProfile.contactEmail || user.email || '-',
+      direccion: professionalProfile.address || '-',
+      fecha: formatDateLabel(documentForm.fecha),
+      numero: documentForm.numero || '-',
+      firmaUrl: String(professionalProfile.signatureUrl || '').trim(),
     }
-  }, [professionalForm])
+  }, [documentForm.fecha, documentForm.numero, professionalProfile, user.email, user.name])
+
+  const missingProfessionalFields = useMemo(() => {
+    const missing = []
+
+    if (!professionalProfile.professionalName && !user.name) {
+      missing.push('nombre')
+    }
+
+    if (!professionalProfile.contactEmail && !user.email) {
+      missing.push('email')
+    }
+
+    if (!professionalProfile.phone) {
+      missing.push('telefono')
+    }
+
+    if (!professionalProfile.address) {
+      missing.push('direccion')
+    }
+
+    if (!professionalProfile.signatureUrl) {
+      missing.push('firma')
+    }
+
+    return missing
+  }, [professionalProfile, user.email, user.name])
 
   const pdfItems = useMemo(() => {
     return selectedItems.map((item) => ({
@@ -346,9 +369,9 @@ function BudgetsManager({ user, notify }) {
   const pdfConditions = useMemo(() => {
     return {
       ...conditionsForm,
-      fechaActualizacionValores: formatDateLabel(conditionsForm.fechaActualizacionValores),
+      fechaActualizacionValores: formatDateLabel(documentForm.fecha),
     }
-  }, [conditionsForm])
+  }, [conditionsForm, documentForm.fecha])
 
   const pdfTotals = useMemo(() => {
     return {
@@ -407,11 +430,13 @@ function BudgetsManager({ user, notify }) {
       const clientsQuery = query(collection(db, 'clients'), where('userId', '==', user.uid))
       const projectsQuery = query(collection(db, 'projects'), where('userId', '==', user.uid))
       const factoryQuery = query(collection(db, 'factoryHours'), where('userId', '==', user.uid))
+      const profileDocRef = doc(db, 'userProfiles', user.uid)
 
-      const [clientsSnapshot, projectsSnapshot, factorySnapshot] = await Promise.all([
+      const [clientsSnapshot, projectsSnapshot, factorySnapshot, profileSnapshot] = await Promise.all([
         getDocs(clientsQuery),
         getDocs(projectsQuery),
         getDocs(factoryQuery),
+        getDoc(profileDocRef),
       ])
 
       const loadedClients = clientsSnapshot.docs.map((item) => ({ id: item.id, ...item.data() }))
@@ -419,10 +444,19 @@ function BudgetsManager({ user, notify }) {
         .map((item) => ({ id: item.id, ...item.data() }))
         .filter((project) => normalizeStatus(project.status) === 'finalizado')
       const loadedFactory = factorySnapshot.docs.map((item) => ({ id: item.id, ...item.data() }))
+      const profileData = profileSnapshot.exists() ? profileSnapshot.data() : {}
+      const normalizedProfile = {
+        professionalName: String(profileData.professionalName || user.name || '').trim(),
+        contactEmail: String(profileData.contactEmail || user.email || '').trim(),
+        phone: String(profileData.phone || '').trim(),
+        address: String(profileData.address || '').trim(),
+        signatureUrl: String(profileData.signatureUrl || '').trim(),
+      }
 
       setClients(loadedClients)
       setProjects(loadedProjects)
       setFactoryRecords(loadedFactory)
+      setProfessionalProfile(normalizedProfile)
       notify?.({
         message: 'Datos del presupuestador actualizados.',
         tone: 'success',
@@ -475,12 +509,25 @@ function BudgetsManager({ user, notify }) {
                   </select>
                 </div>
 
+                <div className="budgets-client-snapshot budgets-field--full" aria-live="polite">
+                  {selectedClient ? (
+                    <>
+                      <p><strong>Contacto:</strong> {selectedClient.contact || '-'}</p>
+                      <p><strong>Telefono:</strong> {selectedClient.phone || '-'}</p>
+                      <p><strong>Direccion:</strong> {selectedClient.address || '-'}</p>
+                      <p><strong>Logo cliente:</strong> {getStatusMark(Boolean(budgetClientData.logoUrl))}</p>
+                    </>
+                  ) : (
+                    <p>Selecciona un cliente para usar automaticamente sus datos en el PDF.</p>
+                  )}
+                </div>
+
                 <div className="budgets-field">
                   <label htmlFor="budget-number">N de presupuesto</label>
                   <input
                     id="budget-number"
-                    value={professionalForm.numero}
-                    onChange={(event) => setProfessionalForm((current) => ({
+                    value={documentForm.numero}
+                    onChange={(event) => setDocumentForm((current) => ({
                       ...current,
                       numero: event.target.value,
                     }))}
@@ -493,220 +540,94 @@ function BudgetsManager({ user, notify }) {
                   <input
                     id="budget-date"
                     type="date"
-                    value={professionalForm.fecha}
-                    onChange={(event) => setProfessionalForm((current) => ({
+                    value={documentForm.fecha}
+                    onChange={(event) => setDocumentForm((current) => ({
                       ...current,
                       fecha: event.target.value,
                     }))}
                   />
                 </div>
 
-                <div className="budgets-field">
-                  <label htmlFor="budget-professional-name">Profesional</label>
-                  <input
-                    id="budget-professional-name"
-                    value={professionalForm.nombre}
-                    onChange={(event) => setProfessionalForm((current) => ({
-                      ...current,
-                      nombre: event.target.value,
-                    }))}
-                  />
+                <div className="budgets-professional-snapshot budgets-field--full" aria-live="polite">
+                  <p><strong>Profesional:</strong> {budgetProfessionalData.nombre}</p>
+                  <p><strong>Telefono:</strong> {budgetProfessionalData.telefono}</p>
+                  <p><strong>Email:</strong> {budgetProfessionalData.email}</p>
+                  <p><strong>Direccion:</strong> {budgetProfessionalData.direccion}</p>
+                  <p><strong>Firma profesional:</strong> {getStatusMark(Boolean(budgetProfessionalData.firmaUrl))}</p>
+                  <p className="budgets-hint">Usa links directos y publicos de imagen (png/jpg/webp) para que se vean en el PDF.</p>
                 </div>
 
-                <div className="budgets-field">
-                  <label htmlFor="budget-professional-phone">Telefono / WhatsApp</label>
-                  <input
-                    id="budget-professional-phone"
-                    value={professionalForm.telefono}
-                    onChange={(event) => setProfessionalForm((current) => ({
-                      ...current,
-                      telefono: event.target.value,
-                    }))}
-                  />
-                </div>
+                {missingProfessionalFields.length > 0 ? (
+                  <p className="budgets-profile-warning budgets-field--full">
+                    Faltan datos del perfil ({missingProfessionalFields.join(', ')}). Completalos en{' '}
+                    <Link to="/profile" className="budgets-profile-link">Mi perfil</Link>.
+                  </p>
+                ) : null}
 
-                <div className="budgets-field budgets-field--full">
-                  <label htmlFor="budget-professional-email">Email</label>
-                  <input
-                    id="budget-professional-email"
-                    value={professionalForm.email}
-                    onChange={(event) => setProfessionalForm((current) => ({
-                      ...current,
-                      email: event.target.value,
-                    }))}
-                  />
-                </div>
+                <details className="budgets-conditions budgets-field--full">
+                  <summary>Condiciones comerciales</summary>
+                  <div className="budgets-conditions-grid">
+                    <div className="budgets-field">
+                      <label htmlFor="budget-iva">IVA (%)</label>
+                      <input
+                        id="budget-iva"
+                        value={conditionsForm.ivaPercent}
+                        onChange={(event) => setConditionsForm((current) => ({
+                          ...current,
+                          ivaPercent: event.target.value,
+                        }))}
+                      />
+                    </div>
 
-                <div className="budgets-field budgets-field--full">
-                  <label htmlFor="budget-professional-address">Direccion</label>
-                  <input
-                    id="budget-professional-address"
-                    value={professionalForm.direccion}
-                    onChange={(event) => setProfessionalForm((current) => ({
-                      ...current,
-                      direccion: event.target.value,
-                    }))}
-                  />
-                </div>
+                    <div className="budgets-field">
+                      <label htmlFor="budget-payment-method">Forma de pago</label>
+                      <input
+                        id="budget-payment-method"
+                        value={conditionsForm.formaPago}
+                        onChange={(event) => setConditionsForm((current) => ({
+                          ...current,
+                          formaPago: event.target.value,
+                        }))}
+                      />
+                    </div>
 
-                <div className="budgets-field">
-                  <label htmlFor="budget-client-phone">Telefono cliente</label>
-                  <input
-                    id="budget-client-phone"
-                    value={clientForm.telefono}
-                    onChange={(event) => setClientForm((current) => ({
-                      ...current,
-                      telefono: event.target.value,
-                    }))}
-                  />
-                </div>
+                    <div className="budgets-field">
+                      <label htmlFor="budget-validity">Validez</label>
+                      <input
+                        id="budget-validity"
+                        value={conditionsForm.validez}
+                        onChange={(event) => setConditionsForm((current) => ({
+                          ...current,
+                          validez: event.target.value,
+                        }))}
+                      />
+                    </div>
 
-                <div className="budgets-field">
-                  <label htmlFor="budget-client-contact">Contacto cliente</label>
-                  <input
-                    id="budget-client-contact"
-                    value={clientForm.contacto}
-                    onChange={(event) => setClientForm((current) => ({
-                      ...current,
-                      contacto: event.target.value,
-                    }))}
-                  />
-                </div>
+                    <div className="budgets-field">
+                      <label htmlFor="budget-delivery-time">Plazo de entrega</label>
+                      <input
+                        id="budget-delivery-time"
+                        value={conditionsForm.plazoEntrega}
+                        onChange={(event) => setConditionsForm((current) => ({
+                          ...current,
+                          plazoEntrega: event.target.value,
+                        }))}
+                      />
+                    </div>
 
-                <div className="budgets-field budgets-field--full">
-                  <label htmlFor="budget-client-address">Direccion cliente</label>
-                  <input
-                    id="budget-client-address"
-                    value={clientForm.direccion}
-                    onChange={(event) => setClientForm((current) => ({
-                      ...current,
-                      direccion: event.target.value,
-                    }))}
-                  />
-                </div>
-
-                <div className="budgets-field budgets-field--full">
-                  <label htmlFor="budget-client-reference">Proyecto / Referencia</label>
-                  <input
-                    id="budget-client-reference"
-                    value={clientForm.referencia}
-                    onChange={(event) => setClientForm((current) => ({
-                      ...current,
-                      referencia: event.target.value,
-                    }))}
-                  />
-                </div>
-
-                <div className="budgets-field budgets-field--full">
-                  <label htmlFor="budget-client-logo">URL logo cliente</label>
-                  <input
-                    id="budget-client-logo"
-                    value={clientForm.logoUrl}
-                    onChange={(event) => setClientForm((current) => ({
-                      ...current,
-                      logoUrl: event.target.value,
-                    }))}
-                    placeholder="https://..."
-                  />
-                </div>
-
-                <div className="budgets-field budgets-field--full">
-                  <label htmlFor="budget-professional-signature">URL firma profesional</label>
-                  <input
-                    id="budget-professional-signature"
-                    value={professionalForm.firmaUrl}
-                    onChange={(event) => setProfessionalForm((current) => ({
-                      ...current,
-                      firmaUrl: event.target.value,
-                    }))}
-                    placeholder="https://..."
-                  />
-                </div>
-
-                <div className="budgets-field">
-                  <label htmlFor="budget-iva">IVA (%)</label>
-                  <input
-                    id="budget-iva"
-                    value={conditionsForm.ivaPercent}
-                    onChange={(event) => setConditionsForm((current) => ({
-                      ...current,
-                      ivaPercent: event.target.value,
-                    }))}
-                  />
-                </div>
-
-                <div className="budgets-field">
-                  <label htmlFor="budget-usd-rate-date">Fecha actualizacion valores</label>
-                  <input
-                    id="budget-usd-rate-date"
-                    type="date"
-                    value={conditionsForm.fechaActualizacionValores}
-                    onChange={(event) => setConditionsForm((current) => ({
-                      ...current,
-                      fechaActualizacionValores: event.target.value,
-                    }))}
-                  />
-                </div>
-
-                <div className="budgets-field">
-                  <label htmlFor="budget-hour-usd">Valor hora USD</label>
-                  <input
-                    id="budget-hour-usd"
-                    value={conditionsForm.valorHoraUsd}
-                    onChange={(event) => setConditionsForm((current) => ({
-                      ...current,
-                      valorHoraUsd: event.target.value,
-                    }))}
-                  />
-                </div>
-
-                <div className="budgets-field">
-                  <label htmlFor="budget-payment-method">Forma de pago</label>
-                  <input
-                    id="budget-payment-method"
-                    value={conditionsForm.formaPago}
-                    onChange={(event) => setConditionsForm((current) => ({
-                      ...current,
-                      formaPago: event.target.value,
-                    }))}
-                  />
-                </div>
-
-                <div className="budgets-field">
-                  <label htmlFor="budget-validity">Validez</label>
-                  <input
-                    id="budget-validity"
-                    value={conditionsForm.validez}
-                    onChange={(event) => setConditionsForm((current) => ({
-                      ...current,
-                      validez: event.target.value,
-                    }))}
-                  />
-                </div>
-
-                <div className="budgets-field">
-                  <label htmlFor="budget-delivery-time">Plazo de entrega</label>
-                  <input
-                    id="budget-delivery-time"
-                    value={conditionsForm.plazoEntrega}
-                    onChange={(event) => setConditionsForm((current) => ({
-                      ...current,
-                      plazoEntrega: event.target.value,
-                    }))}
-                  />
-                </div>
-
-                <div className="budgets-field budgets-field--full">
-                  <label htmlFor="budget-delivery-method">Forma de entrega</label>
-                  <input
-                    id="budget-delivery-method"
-                    value={conditionsForm.formaEntrega}
-                    onChange={(event) => setConditionsForm((current) => ({
-                      ...current,
-                      formaEntrega: event.target.value,
-                    }))}
-                  />
-                </div>
+                    <div className="budgets-field budgets-field--full">
+                      <label htmlFor="budget-delivery-method">Forma de entrega</label>
+                      <input
+                        id="budget-delivery-method"
+                        value={conditionsForm.formaEntrega}
+                        onChange={(event) => setConditionsForm((current) => ({
+                          ...current,
+                          formaEntrega: event.target.value,
+                        }))}
+                      />
+                    </div>
+                  </div>
+                </details>
 
                 <div className="budgets-field budgets-field--full">
                   <label htmlFor="budget-notes">Observaciones</label>
@@ -793,7 +714,7 @@ function BudgetsManager({ user, notify }) {
                 </button>
                 <PDFDownloadLink
                   document={budgetDocument}
-                  fileName={`presupuesto-${professionalForm.numero || 'sin-numero'}.pdf`}
+                  fileName={`presupuesto-${documentForm.numero || 'sin-numero'}.pdf`}
                   className={`budgets-download-link${canGeneratePdf ? '' : ' budgets-download-link--disabled'}`}
                 >
                   {({ loading: downloading }) => {

@@ -6,7 +6,6 @@ const firebaseConfig = {
   apiKey: "AIzaSyAAlQuFfxt9LUSfT1FASQtmsN1OV-HsS7U",
   authDomain: "factory-manager-79d25.firebaseapp.com",
   projectId: "factory-manager-79d25",
-  storageBucket: "factory-manager-79d25.firebasestorage.app",
   messagingSenderId: "894547212789",
   appId: "1:894547212789:web:ffac13b4703e77c60d48bc"
 };

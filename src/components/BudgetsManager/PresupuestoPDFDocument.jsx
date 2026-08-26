@@ -178,10 +178,17 @@ const styles = StyleSheet.create({
   },
   signatureColumn: {
     width: '42%',
+    display: 'flex',
+    flexDirection: 'column',
   },
   signatureTitle: {
-    marginBottom: 28,
+    marginBottom: 6,
     fontSize: 10,
+  },
+  signatureAssetSlot: {
+    height: 40,
+    justifyContent: 'flex-end',
+    marginBottom: 6,
   },
   signatureLine: {
     borderTopWidth: 1,
@@ -293,10 +300,6 @@ export function PresupuestoPDFDocument({
               <Text style={styles.label}>Contacto:</Text>
               <Text style={styles.value}>{normalizeText(cliente.contacto)}</Text>
             </View>
-            <View style={styles.row}>
-              <Text style={styles.label}>Proyecto / Referencia:</Text>
-              <Text style={styles.value}>{normalizeText(cliente.referencia)}</Text>
-            </View>
           </View>
 
           <View style={styles.logoContainer}>
@@ -314,7 +317,7 @@ export function PresupuestoPDFDocument({
             <Text style={styles.colItem}>Item</Text>
             <Text style={styles.colDesc}>Descripcion detallada del trabajo</Text>
             <Text style={styles.colHs}>Hs</Text>
-            <Text style={styles.colPrice}>Precio Unitario (ARS)**</Text>
+            <Text style={styles.colPrice}>Precio Unitario (ARS)</Text>
             <Text style={styles.colSubtotal}>Subtotal (ARS)*</Text>
           </View>
           {items.map((item, index) => (
@@ -352,9 +355,6 @@ export function PresupuestoPDFDocument({
         <Text style={styles.notes}>
           *Precios expresados en ARS, equivalentes a valores en USD segun cotizacion vendedor BNA actualizada a la fecha del presupuesto.
         </Text>
-        <Text style={styles.notes}>
-          **Valor = {normalizeText(condiciones.valorHoraUsd)} USD/Hs     Valor actualizado a partir de {normalizeText(condiciones.fechaActualizacionValores)}
-        </Text>
 
         <View style={styles.conditionsWrap}>
           <Text style={styles.sectionTitle}>CONDICIONES COMERCIALES</Text>
@@ -383,12 +383,15 @@ export function PresupuestoPDFDocument({
         <View style={styles.signatures}>
           <View style={styles.signatureColumn}>
             <Text style={styles.signatureTitle}>Firma Cliente:</Text>
+            <View style={styles.signatureAssetSlot} />
             <View style={styles.signatureLine} />
           </View>
 
           <View style={styles.signatureColumn}>
             <Text style={styles.signatureTitle}>Firma Profesional:</Text>
-            {profesional.firmaUrl ? <Image src={profesional.firmaUrl} style={styles.signatureImage} /> : null}
+            <View style={styles.signatureAssetSlot}>
+              {profesional.firmaUrl ? <Image src={profesional.firmaUrl} style={styles.signatureImage} /> : null}
+            </View>
             <View style={styles.signatureLine} />
           </View>
         </View>

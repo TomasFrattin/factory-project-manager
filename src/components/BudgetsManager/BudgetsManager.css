@@ -63,6 +63,82 @@
   color: var(--color-text-soft);
 }
 
+.budgets-client-snapshot {
+  border: 1px dashed var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-soft);
+  padding: 10px;
+  display: grid;
+  gap: 5px;
+}
+
+.budgets-client-snapshot p {
+  margin: 0;
+  color: var(--color-text);
+}
+
+.budgets-client-snapshot strong {
+  color: var(--color-title);
+}
+
+.budgets-professional-snapshot {
+  border: 1px dashed var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-soft);
+  padding: 10px;
+  display: grid;
+  gap: 5px;
+}
+
+.budgets-professional-snapshot p {
+  margin: 0;
+  color: var(--color-text);
+}
+
+.budgets-professional-snapshot strong {
+  color: var(--color-title);
+}
+
+.budgets-hint {
+  margin-top: 2px;
+  color: var(--color-text-soft);
+  font-size: 0.84rem;
+}
+
+.budgets-profile-warning {
+  margin: 0;
+  border: 1px solid var(--border-danger-soft);
+  border-radius: var(--radius-sm);
+  background: var(--surface-danger-soft);
+  color: var(--color-danger);
+  padding: 8px 10px;
+}
+
+.budgets-profile-link {
+  color: inherit;
+  font-weight: 700;
+}
+
+.budgets-conditions {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  padding: 8px 10px;
+}
+
+.budgets-conditions summary {
+  cursor: pointer;
+  color: var(--color-title);
+  font-weight: 700;
+}
+
+.budgets-conditions-grid {
+  margin-top: 10px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px 12px;
+}
+
 .budgets-field input,
 .budgets-field textarea,
 .budgets-field select {
@@ -263,6 +339,10 @@
 
 @media (max-width: 780px) {
   .budgets-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .budgets-conditions-grid {
     grid-template-columns: 1fr;
   }
 

@@ -12,6 +12,12 @@ import {
   where,
 } from 'firebase/firestore'
 import { db } from '../../firebase.js'
+import {
+  getCloudinaryConfigError,
+  hasCloudinaryConfig,
+  uploadImageToCloudinary,
+  validateImageFile,
+} from '../../services/cloudinaryUpload.js'
 import Modal from '../Modal/Modal.jsx'
 import './ClientsManager.css'
 
@@ -20,6 +26,9 @@ const createInitialForm = () => ({
   name: '',
   cuit: '',
   contact: '',
+  phone: '',
+  address: '',
+  logoUrl: '',
 })
 
 function ClientsManager({ user, notify }) {
@@ -32,6 +41,9 @@ function ClientsManager({ user, notify }) {
   const [saving, setSaving] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
+  const [selectedLogoFile, setSelectedLogoFile] = useState(null)
+  const [isLogoDragActive, setIsLogoDragActive] = useState(false)
+  const [logoUploadError, setLogoUploadError] = useState('')
 
   const loadClients = async () => {
     setLoading(true)
@@ -97,6 +109,9 @@ function ClientsManager({ user, notify }) {
   const resetForm = () => {
     setFormData(createInitialForm())
     setEditingClientId(null)
+    setSelectedLogoFile(null)
+    setLogoUploadError('')
+    setIsLogoDragActive(false)
   }
 
   const closeForm = () => {
@@ -114,17 +129,47 @@ function ClientsManager({ user, notify }) {
     setIsFormOpen(true)
   }
 
+  const handleSelectLogoFile = (file) => {
+    const validationMessage = validateImageFile(file)
+
+    if (validationMessage) {
+      setLogoUploadError(validationMessage)
+      setSelectedLogoFile(null)
+      return
+    }
+
+    setLogoUploadError('')
+    setSelectedLogoFile(file)
+  }
+
+  const uploadClientLogo = async (clientId, file) => {
+    const folder = `factory-manager/clients/${user.uid}/${clientId}`
+    const uploadedFile = await uploadImageToCloudinary(file, folder)
+
+    return {
+      logoUrl: uploadedFile.url,
+      logoPublicId: uploadedFile.publicId,
+    }
+  }
+
   const handleSubmit = async (event) => {
     event.preventDefault()
     setSaving(true)
     setErrorMessage('')
 
     try {
+      if (selectedLogoFile && !hasCloudinaryConfig()) {
+        throw new Error(getCloudinaryConfigError())
+      }
+
       const payload = {
         company: formData.company.trim(),
         name: formData.name.trim(),
         cuit: formData.cuit.trim(),
         contact: formData.contact.trim(),
+        phone: formData.phone.trim(),
+        address: formData.address.trim(),
+        logoUrl: formData.logoUrl.trim(),
         userId: user.uid,
         userEmail: user.email,
         updatedAt: serverTimestamp(),
@@ -132,15 +177,35 @@ function ClientsManager({ user, notify }) {
 
       if (editingClientId) {
         await updateDoc(doc(db, 'clients', editingClientId), payload)
+
+        if (selectedLogoFile) {
+          const uploadedLogo = await uploadClientLogo(editingClientId, selectedLogoFile)
+          await updateDoc(doc(db, 'clients', editingClientId), {
+            logoUrl: uploadedLogo.logoUrl,
+            logoPublicId: uploadedLogo.logoPublicId,
+            updatedAt: serverTimestamp(),
+          })
+        }
+
         notify?.({
           message: `Se ha modificado el cliente "${payload.company}" correctamente.`,
           tone: 'success',
         })
       } else {
-        await addDoc(collection(db, 'clients'), {
+        const createdClientRef = await addDoc(collection(db, 'clients'), {
           ...payload,
           createdAt: serverTimestamp(),
         })
+
+        if (selectedLogoFile) {
+          const uploadedLogo = await uploadClientLogo(createdClientRef.id, selectedLogoFile)
+          await updateDoc(doc(db, 'clients', createdClientRef.id), {
+            logoUrl: uploadedLogo.logoUrl,
+            logoPublicId: uploadedLogo.logoPublicId,
+            updatedAt: serverTimestamp(),
+          })
+        }
+
         notify?.({
           message: `Se ha creado el cliente "${payload.company}" satisfactoriamente.`,
           tone: 'success',
@@ -151,7 +216,7 @@ function ClientsManager({ user, notify }) {
       closeForm()
     } catch (error) {
       console.error('Error al guardar cliente:', error)
-      setErrorMessage('No se pudo guardar el cliente.')
+      setErrorMessage(error?.message || 'No se pudo guardar el cliente.')
     } finally {
       setSaving(false)
     }
@@ -166,7 +231,12 @@ function ClientsManager({ user, notify }) {
       name: client.name || '',
       cuit: client.cuit || '',
       contact: client.contact || '',
+      phone: client.phone || '',
+      address: client.address || '',
+      logoUrl: client.logoUrl || '',
     })
+    setSelectedLogoFile(null)
+    setLogoUploadError('')
   }
 
   const handleDelete = async () => {
@@ -234,6 +304,9 @@ function ClientsManager({ user, notify }) {
                   <th>Nombre</th>
                   <th>CUIT</th>
                   <th>Contacto</th>
+                  <th>Telefono</th>
+                  <th>Direccion</th>
+                  <th>Logo</th>
                   <th>Acciones</th>
                 </tr>
               </thead>
@@ -244,6 +317,9 @@ function ClientsManager({ user, notify }) {
                     <td>{client.name || '-'}</td>
                     <td>{client.cuit || '-'}</td>
                     <td>{client.contact || '-'}</td>
+                    <td>{client.phone || '-'}</td>
+                    <td>{client.address || '-'}</td>
+                    <td>{client.logoUrl ? 'Si' : 'No'}</td>
                     <td className="clients-actions-cell">
                       <div className="clients-actions-content">
                         <button
@@ -316,6 +392,63 @@ function ClientsManager({ user, notify }) {
             onChange={handleChange}
             required
           />
+
+          <label htmlFor="client-phone">Telefono</label>
+          <input
+            id="client-phone"
+            name="phone"
+            value={formData.phone}
+            onChange={handleChange}
+            required
+          />
+
+          <label htmlFor="client-address">Direccion</label>
+          <input
+            id="client-address"
+            name="address"
+            value={formData.address}
+            onChange={handleChange}
+            required
+          />
+
+          <div className="clients-upload clients-upload--full">
+            <label htmlFor="client-logo-file">Logo cliente (JPG, PNG o WEBP)</label>
+            <div
+              className={`clients-upload-dropzone${isLogoDragActive ? ' clients-upload-dropzone--active' : ''}`}
+              onDragOver={(event) => {
+                event.preventDefault()
+                setIsLogoDragActive(true)
+              }}
+              onDragLeave={(event) => {
+                event.preventDefault()
+                setIsLogoDragActive(false)
+              }}
+              onDrop={(event) => {
+                event.preventDefault()
+                setIsLogoDragActive(false)
+                const droppedFile = event.dataTransfer.files?.[0]
+                handleSelectLogoFile(droppedFile)
+              }}
+            >
+              <input
+                id="client-logo-file"
+                type="file"
+                accept="image/png,image/jpeg,image/webp"
+                onChange={(event) => handleSelectLogoFile(event.target.files?.[0])}
+              />
+              <p>
+                {selectedLogoFile
+                  ? `Archivo seleccionado: ${selectedLogoFile.name}`
+                  : 'Arrastra una imagen aqui o selecciona un archivo'}
+              </p>
+              <small>
+                {formData.logoUrl
+                  ? 'Ya existe un logo guardado. Si subes uno nuevo se reemplaza.'
+                  : 'Sin logo cargado actualmente.'}
+              </small>
+            </div>
+            {logoUploadError ? <p className="clients-upload-error">{logoUploadError}</p> : null}
+          </div>
 
           <button type="submit" className="clients-submit" disabled={saving}>
             {saving

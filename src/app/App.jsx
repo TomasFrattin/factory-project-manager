@@ -14,6 +14,7 @@ import TariffsPage from '../pages/TariffsPage/TariffsPage.jsx'
 import GainsPage from '../pages/GainsPage/GainsPage.jsx'
 import NotesPage from '../pages/NotesPage/NotesPage.jsx'
 import BudgetsPage from '../pages/BudgetsPage/BudgetsPage.jsx'
+import ProfilePage from '../pages/ProfilePage/ProfilePage.jsx'
 import WorkspaceLayout from './WorkspaceLayout.jsx'
 import { auth, googleProvider } from '../firebase.js'
 import './App.css'
@@ -113,6 +114,7 @@ function App() {
           <Route path="/gains" element={<GainsPage user={sessionUser} />} />
           <Route path="/notes" element={<NotesPage user={sessionUser} />} />
           <Route path="/budgets" element={<BudgetsPage user={sessionUser} />} />
+          <Route path="/profile" element={<ProfilePage user={sessionUser} />} />
         </Route>
         <Route
           path="*"

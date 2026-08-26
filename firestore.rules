@@ -55,5 +55,12 @@ service cloud.firestore {
       allow update: if isUpdatingOwnDoc();
       allow delete: if isOwner();
     }
+
+    match /userProfiles/{docId} {
+      allow read: if isOwner();
+      allow create: if isCreatingOwnDoc();
+      allow update: if isUpdatingOwnDoc();
+      allow delete: if isOwner();
+    }
   }
 }
